@@ -1,0 +1,30 @@
+{
+  "name": "objects-at-rest",
+  "version": "1.0.0",
+  "description": "A simple in-memory object-store server for REST API play-testing.",
+  "main": "router.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "William Hilton",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wmhilton/objects-at-rest.git"
+  },
+  "keywords": [
+    "rest",
+    "json",
+    "api",
+    "mock"
+  ],
+  "bugs": {
+    "url": "https://github.com/wmhilton/objects-at-rest/issues"
+  },
+  "homepage": "https://github.com/wmhilton/objects-at-rest#readme"
+}
