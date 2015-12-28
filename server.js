@@ -25,6 +25,5 @@ var server = app.listen(3000, 'localhost', function () {
 process.on('SIGINT', function(){
   console.log('bye')
   fs.writeFileSync('store.json', rest.save())
-  server.close()
   process.exit()
 })
