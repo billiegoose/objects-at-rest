@@ -42,11 +42,11 @@ The next time the server starts, it will read store.json to populate the *store*
 ## The Module
 The module exports the following:
 
- Method     | Description                  | Inputs      | Output
-------------|-------------------------------------------------------
- *router()* | The Express router           | none        | [Router](http://expressjs.com/en/4x/api.html#router)
- *save()*   | Export the *store*           | none        | JSON string
- *load()*   | Import the *store*           | JSON String | none
+| Method     | Description                  | Inputs      | Output
+| ---------- | ---------------------------- | ----------- | ---------------
+| *router()* | The Express router           | none        | [Router](http://expressjs.com/en/4x/api.html#router)
+| *save()*   | Export the *store*           | none        | JSON string
+| *load()*   | Import the *store*           | JSON String | none
 
 ### Example Usage
 ```JavaScript
