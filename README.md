@@ -6,18 +6,71 @@ when you could generate your dummy data using the very AJAX commands you want to
 
 *Objects@REST* is a simple in-memory [object store](https://en.wikipedia.org/wiki/Object_storage) server for REST API play-testing.
 
-## Features
+### Features
 - **What You PUT Is What You GET (WYPIWYG).** It's that simple.
 - Handle GET, POST, PUT, PATCH, and DELETE methods.
 - Return `200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, and `404 Not Found` statuses.
 - Create dummy data from POST, PUT, and PATCH bodies.
-- Save dummy data to JSON. Load dummy data from JSON.
+- Import and export dummy data as JSON.
 - Written in [Node](https://nodejs.org/en/) using [Express](http://expressjs.com).
 
-The module comes with a demo server, but can also be `require`'d to return a router
+The module comes with a demo server, but can also be `require`'d to return an Express router
 you can mount on a path in your own Node application.
 
-## API Documentation
+## Installation
+
+With npm (latest official release):
+```bash
+npm install objects-at-rest
+```
+
+With git (most recent code):
+```bash
+git clone https://github.com/wmhilton/objects-at-rest
+cd objects-at-rest
+npm install
+```
+
+## Run demo server
+```
+npm start
+```
+This will run server.js, an instance of [Express](http://expressjs.com/) running on localhost:3000.
+When you hit Ctrl+C it will dump the *store* to store.json.
+The next time the server starts, it will read store.json to populate the *store*.
+
+## The Module
+The module exports the following:
+
+ Method     | Description                  | Inputs      | Output
+------------|-------------------------------------------------------
+ *router()* | The Express router           | none        | [Router](http://expressjs.com/en/4x/api.html#router)
+ *save()*   | Export the *store*           | none        | JSON string
+ *load()*   | Import the *store*           | JSON String | none
+
+### Example Usage
+```JavaScript
+var fs = require('fs')
+var express = require('express')
+var app = express()
+
+// Example - require
+var rest = require('objects-at-rest')
+
+// Example - mount router
+app.use('/api/v1/', rest.router())
+
+// Example - load store.json on start
+rest.load(fs.readFileSync('store.json'))
+
+var server = app.listen()
+
+// Example - Export store on exit.
+server.on('close', function(){
+  fs.writeFileSync('store.json', rest.save())
+})
+```
+## The REST API
 There are two kinds of resources: *items* & *collections*.
 They are analogous to documents & collections (in MongoDB),
 objects & buckets (in Amazon S3), objects & containers (in Rackspace Cloud File)...
@@ -96,52 +149,3 @@ taking "largest Integer property key" + 1.
 Delete *store.foobar*.
 - Returns: `400 Bad Request` if the collection is not empty.
 - Returns: `204 No Content` if *store.foobar* was deleted or did not exist
-
-## Installation
-
-```bash
-npm install objects-at-rest
-```
-
-## Run demo server
-```
-npm start
-```
-This will run server.js, an instance of [Express](http://expressjs.com/) running on localhost:3000.
-When you hit Ctrl+C it will dump the *store* to store.json.
-The next time the server starts, it will read store.json and repopulate the *store*.
-
-## Node API
-The `objects-at-rest` module exports:
-- router:
-  - The Express router that executes the API
-  - Type: `express.Router()`
-- save:
-  - Export the *store* to a JSON string.
-  - Type: `() => String`
-- load:
-  - Import a JSON string to the *store*.
-  - Type: `(String) => void`
-
-### Example Usage
-```JavaScript
-var fs = require('fs')
-var express = require('express')
-var app = express()
-
-// Example - require
-var rest = require('objects-at-rest')
-
-// Example - mount router
-app.use('/api/v1/', rest.router)
-
-// Example - load store.json on start
-rest.load(fs.readFileSync('store.json'))
-
-var server = app.listen()
-
-// Example - Export store on exit.
-server.on('close', function(){
-  fs.writeFileSync('store.json', rest.save())
-})
-```

@@ -6,7 +6,7 @@ app.set('x-powered-by', false)
 
 // Mount Objects@REST API
 var rest = require('./router')
-app.use('/', rest.router)
+app.use('/', rest.router())
 
 // Import store.json on start.
 try {

@@ -113,10 +113,8 @@ function pseudolength(o) {
 }
 
 module.exports = {
-  router: router,
-  save: function() {
-    return JSON.stringify(store)
-  },
+  router: () => router,
+  save: () => JSON.stringify(store),
   load: function(json) {
     store = JSON.parse(json)
   }
