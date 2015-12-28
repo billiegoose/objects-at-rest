@@ -9,7 +9,7 @@ var router = express.Router()
 router.use(bodyParser.json({type: '*/*'}))
 router.use (function (error, req, res, next){
   if (error instanceof SyntaxError) {
-    res.status(400).send({error: 'Invalid JSON'})
+    res.status(400).json({error: 'Invalid JSON'})
   } else {
     next()
   }
@@ -21,24 +21,12 @@ var store = {}
 
 // TODO: Make this more useful for API discovery
 router.get('/', function (req, res) {
-  res.status(200).json(Object.keys(store))
-})
-
-// Get all of resource
-router.get('/:collection', collection, function (req, res) {
-  res.status(200).json(Object.assign({}, req.collection))
+  res.status(200).json(store)
 })
 
 // Get a single resource
 router.get('/:collection/:id', collection, item, function (req, res) {
   res.status(200).json(req.item)
-})
-
-// Create new resource, auto-assign id
-router.post('/:collection', collection, function (req, res) {
-  var index = req.collection.push(req.body) - 1
-  res.location('/'+req.params.collection+'/'+index.toString())
-  res.status(201).send(req.body)
 })
 
 // Create or update resource
@@ -59,9 +47,34 @@ router.delete('/:collection/:id', collection, item, function (req, res) {
   res.status(204).send()
 })
 
+// Get all of resource
+router.get('/:collection', collection, function (req, res) {
+  res.status(200).json(req.collection)
+})
+
+// Create new resource, auto-assign id
+router.post('/:collection', collection, function (req, res) {
+  var index = pseudolength(req.collection) + 1
+  req.collection[index] = req.body
+  res.location('/'+req.params.collection+'/'+index)
+  res.status(201).send(req.body)
+})
+
+// Delete all of a resource
+router.delete('/:collection', collection, function (req, res) {
+  if (!req.collection) {
+    return res.status(204).send()
+  }
+  if (Object.keys(req.collection).length === 0) {
+    delete store[req.params.collection]
+    return res.status(204).send()
+  }
+  return res.status(400).json({error: `'/${req.params.collection}' is not empty!`})
+})
+
 // Unsupported method catchall
 router.use(function(req, res){
-  res.status(400).json({error: "'"+req.method+" "+req.path+"' is not a supported operation"})
+  res.status(400).json({error: `${req.method} ${req.path}' is not a supported operation`})
 })
 
 // Middleware logic
@@ -69,9 +82,11 @@ function collection(req, res, next) {
   var col = req.params.collection
   if (!store.hasOwnProperty(col)) {
     if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
-      store[col] = []
+      store[col] = {}
+    } else if (req.method === 'DELETE') {
+      return res.status(204).send()
     } else {
-      return res.status(404).json({error: "'/"+col+"' does not exist"})
+      return res.status(404).json({error: `'/${col}' does not exist`})
     }
   }
   req.collection = store[col]
@@ -83,13 +98,18 @@ function item(req, res, next) {
   var id = req.params.id
   var present = req.collection.hasOwnProperty(id)
   if (!present && (req.method === 'GET')) {
-    return res.status(404).json({error: "'/"+col+"/"+id+"' not found"})
+    return res.status(404).json({error: `'/${col}/${id}' not found`})
   }
   if (!present && (req.method === 'PATCH')) {
     req.collection[id] = {}
   }
   req.item = req.collection[id]
   next()
+}
+
+// Return the highest numbered "index" on an object
+function pseudolength(o) {
+  return Object.keys(o).reduce( (x,y) => Math.max(parseInt(x)||-1, parseInt(y)||-1), 0 )
 }
 
 module.exports = {
